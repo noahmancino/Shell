@@ -17,10 +17,12 @@ int main(int argc, char *argv[]) {
 
     size_t size = 0;
     char *input = NULL;
+    char *token = (char *)malloc(sizeof(char) * PATH_MAX)
     // repl
     while (1) {
         printf(">>> ");
         getline(&input, &size, stdin);
+
         if (strcmp("exit\n", input) == 0) {
             free(input);
             fclose(stdout);

@@ -9,6 +9,9 @@
 #include <string.h>
 #include <fcntl.h>
 
+/*
+ * ls except it doesn't ignore dot files.
+ */
 void listDir() {
     char cwdStr[PATH_MAX];
     getcwd(cwdStr, sizeof(cwdStr));
@@ -26,12 +29,18 @@ void listDir() {
     closedir(cwd);
 }
 
+/*
+ * pwd
+ */
 void showCurrentDir() {
     char cwdStr[PATH_MAX];
     getcwd(cwdStr, sizeof(cwdStr));
     write(STDOUT_FILENO, cwdStr, strlen(cwdStr));
 }
 
+/*
+ * Makes a new directory called dirName under the current directory.
+ */
 void makeDir(char *dirName) {
     char dirPath[PATH_MAX];
 
@@ -57,6 +66,10 @@ void changeDir(char *dirName) {
 
     chdir(dirPath);
 }
+
+/*
+ * Copies the source file to the destination file. Creates the destination file if it does not exist.
+ */
 void copyFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
     char absDest[PATH_MAX];
@@ -70,9 +83,7 @@ void copyFile(char *sourcePath, char *destinationPath) {
     int fdSrc = open(absSource, O_RDONLY);
     int fdDest = open(absDest, O_CREAT | O_WRONLY, 0666);
     struct stat st;
-    struct stat st2;
     stat(sourcePath, &st);
-    stat(destinationPath, &st2);
     __off_t srcSize = st.st_size;
     sendfile(fdDest, fdSrc, NULL, srcSize);
     close(fdSrc);
@@ -85,20 +96,27 @@ void copyFile(char *sourcePath, char *destinationPath) {
 void moveFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
     char absDest[PATH_MAX];
+
     getcwd(absDest, sizeof(absDest));
     strcat(absDest, "/");
     strcpy(absSource, absDest);
     strcat(absSource, sourcePath);
     strcat(absDest, destinationPath);
+
     rename(absSource, absDest);
 }
 
+/*
+ * Deletes regular files.
+ */
 void deleteFile(char *filename) {
     char absPath[PATH_MAX];
+    struct stat fileStat;
+
     getcwd(absPath, sizeof(absPath));
     strcat(absPath, "/");
     strcat(absPath, filename);
-    struct stat fileStat;
+
     stat(absPath, &fileStat);
     if (S_ISREG(fileStat.st_mode)) {
         unlink(absPath);
@@ -108,17 +126,23 @@ void deleteFile(char *filename) {
     }
 }
 
+/*
+ * Prints the contents of files to STDOUT
+ */
 void displayFile(char *filename) {
-    // TODO: Make sure file exists.
     char absPath[PATH_MAX];
     char buff[5];
+    struct stat fileStat;
+
     getcwd(absPath, sizeof(absPath));
     strcat(absPath, "/");
     strcat(absPath, filename);
-    printf("%s", absPath);
-    int fd = open(absPath, O_RDONLY);
-    while (read(fd, buff, 1) != 0) {
-        write(STDOUT_FILENO, buff, 1);
+
+    if (stat(filename, &fileStat) == 0) {
+        int fd = open(absPath, O_RDONLY);
+        while (read(fd, buff, 1) != 0) {
+            write(STDOUT_FILENO, buff, 1);
+        }
+        close(fd);
     }
-    close(fd);
 }
