@@ -50,7 +50,7 @@ void makeDir(char *dirName) {
 
     // All permissions that don't conflict with umask will always be granted.
     if (mkdir(dirPath, 0777) == -1) {
-        write(STDERR_FILENO, "File already exists.", 20);
+        write(STDOUT_FILENO, "ERROR: File already exists.", 20);
     }
 }
 
