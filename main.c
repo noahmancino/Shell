@@ -36,15 +36,17 @@ int main(int argc, char *argv[]) {
         }
         else if (strcmp("mkdir\n", input) == 0) {
             makeDir("apples");
+            printf("");
         }
         else if (strcmp("cp\n", input) == 0) {
             copyFile("apples", "oranges");
         }
         else if (strcmp("cd\n", input) == 0) {
-            changeDir("apples");
+            changeDir("..");
+            printf("");
         }
         else if (strcmp("mv\n", input) == 0) {
-            moveFile("apples", "oranges");
+            moveFile("something.txt", "different.txt");
         }
         else if (strcmp("rm\n", input) == 0) {
             deleteFile("apples");

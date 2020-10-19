@@ -1,12 +1,13 @@
 //
 // Created by noahmancino on 10/19/20.
 //
+#include <sys/sendfile.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>
 #include <fcntl.h>
-#define PATH_MAX 1000
 
 void listDir() {
     char cwdStr[PATH_MAX];
@@ -32,26 +33,83 @@ void showCurrentDir() {
 }
 
 void makeDir(char *dirName) {
-    printf("mking");
+    char dirPath[PATH_MAX];
+
+    getcwd(dirPath, sizeof(dirPath));
+    strcat(dirPath, "/");
+    strcat(dirPath, dirName);
+
+    // All permissions that don't conflict with umask will always be granted.
+    if (mkdir(dirPath, 0777) == -1) {
+        write(STDERR_FILENO, "File already exists.", 20);
+    }
 }
 
+/*
+ * Should always function like cd in bash.
+ */
 void changeDir(char *dirName) {
-    printf("cding");
-}
+    char dirPath[PATH_MAX];
 
+    getcwd(dirPath, sizeof(dirPath));
+    strcat(dirPath, "/");
+    strcat(dirPath, dirName);
+
+    chdir(dirPath);
+}
 void copyFile(char *sourcePath, char *destinationPath) {
-    printf("cping");
+    char absSource[PATH_MAX];
+    char absDest[PATH_MAX];
+
+    getcwd(absDest, sizeof(absDest));
+    strcat(absDest, "/");
+    strcpy(absSource, absDest);
+    strcat(absSource, sourcePath);
+    strcat(absDest, destinationPath);
+
+    int fdSrc = open(absSource, O_RDONLY);
+    int fdDest = open(absDest, O_CREAT | O_WRONLY, 0666);
+    struct stat st;
+    struct stat st2;
+    stat(sourcePath, &st);
+    stat(destinationPath, &st2);
+    __off_t srcSize = st.st_size;
+    sendfile(fdDest, fdSrc, NULL, srcSize);
+    close(fdSrc);
+    close(fdDest);
 }
 
+/*
+ * Like mv in bash, except arguments are always assumed to be relative paths.
+ */
 void moveFile(char *sourcePath, char *destinationPath) {
-    printf("mving");
+    char absSource[PATH_MAX];
+    char absDest[PATH_MAX];
+    getcwd(absDest, sizeof(absDest));
+    strcat(absDest, "/");
+    strcpy(absSource, absDest);
+    strcat(absSource, sourcePath);
+    strcat(absDest, destinationPath);
+    rename(absSource, absDest);
 }
 
 void deleteFile(char *filename) {
-    printf("rming");
+    char absPath[PATH_MAX];
+    getcwd(absPath, sizeof(absPath));
+    strcat(absPath, "/");
+    strcat(absPath, filename);
+    struct stat fileStat;
+    stat(absPath, &fileStat);
+    if (S_ISREG(fileStat.st_mode)) {
+        unlink(absPath);
+    }
+    else {
+        rmdir(absPath);
+    }
 }
 
 void displayFile(char *filename) {
+    // TODO: Make sure file exists.
     char absPath[PATH_MAX];
     char buff[5];
     getcwd(absPath, sizeof(absPath));
