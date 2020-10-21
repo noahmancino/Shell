@@ -18,6 +18,8 @@ int valid_single_arg(const char *arg) {
 int valid_double_arg(const char *arg1, const char* arg2) {
     return !(arg1 == NULL || arg1[0] == ';' || arg2 == NULL || arg2[0] == ';');
 }
+// TODO: Factor out the logic that's copied in each lf (make two functions that take args and a function pointer,
+//  one for one arg one for two args.)
 
 int main(int argc, char *argv[]) {
     // Everything is written to stdout. You can specify where stout should go with the -f flag and a filename.
@@ -30,19 +32,22 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
     }
-
     size_t size = 0;
     char *input = NULL;
+     // The way 'token' is used doesn't really make sense. It's really just there to prove I know what malloc does.
+
+    char *token = (char*)malloc(sizeof(char) * 4000);
     // repl
     while (1) {
         printf(">>> ");
         getline(&input, &size, stdin);
-        char *token = strtok(input, " \n");
+        char *token_buf = strtok(input, " \n");
         int final_semi = 0;
         int all_args = 0;
         // Outer if is for empty lines.
-        if (token != NULL) {
+        if (token_buf != NULL) {
             do {
+                strcpy(token, token_buf);
                 if (strcmp(";", token) == 0) {
                     final_semi = 1;
                     all_args = 0;
@@ -54,6 +59,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
                 if (strcmp("exit", token) == 0) {
+                    free(token);
                     free(input);
                     fclose(stdout);
                     exit(EXIT_SUCCESS);
@@ -131,7 +137,7 @@ int main(int argc, char *argv[]) {
                     printf("Error: unrecognized command %s\n", input);
                     break;
                 }
-            } while ((token = strtok(NULL, " \n")) != NULL);
+            } while ((token_buf = strtok(NULL, " \n")) != NULL);
             if (final_semi) {
                 printf(EndOnCol);
             }

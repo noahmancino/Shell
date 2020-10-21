@@ -18,11 +18,8 @@ void listDir() {
     DIR *cwd = opendir(cwdStr);
     struct dirent *nextFile;
 
-    // Loop through the files
     while ((nextFile = readdir(cwd)) != NULL) {
-        // Get the file's name.
         char *fileName = nextFile->d_name;
-        // Write the file's name to stdout
         write(STDOUT_FILENO, fileName, strlen(fileName));
         write(STDOUT_FILENO, "\n", 1);
     }
@@ -74,24 +71,33 @@ void copyFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
     char absDest[PATH_MAX];
 
+    char *filename = strrchr(sourcePath, '/');
+    if (filename != NULL) filename += 1;
+
     getcwd(absDest, sizeof(absDest));
     strcat(absDest, "/");
     strcpy(absSource, absDest);
     strcat(absSource, sourcePath);
     strcat(absDest, destinationPath);
-
     if (sourcePath[0] == '/') {
         strcpy(absSource, sourcePath);
     }
-    if (destinationPath[0] = '/') {
+    if (destinationPath[0] == '/') {
         strcpy(absDest, destinationPath);
+    }
+    struct stat st;
+    if (stat(absDest, &st) == 0) {
+        if (!S_ISREG(st.st_mode)) {
+            strcat(absDest, "/");
+            strcat(absDest, filename);
+        }
     }
 
     int fdSrc = open(absSource, O_RDONLY);
     int fdDest = open(absDest, O_CREAT | O_WRONLY, 0666);
-    struct stat st;
-    stat(sourcePath, &st);
-    __off_t srcSize = st.st_size;
+    struct stat st2;
+    stat(absSource, &st2);
+    __off_t srcSize = st2.st_size;
     sendfile(fdDest, fdSrc, NULL, srcSize);
     close(fdSrc);
     close(fdDest);
@@ -104,6 +110,9 @@ void moveFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
     char absDest[PATH_MAX];
 
+    char *filename = strrchr(sourcePath, '/');
+    if (filename != NULL) filename += 1;
+
     getcwd(absDest, sizeof(absDest));
     strcat(absDest, "/");
     strcpy(absSource, absDest);
@@ -112,8 +121,15 @@ void moveFile(char *sourcePath, char *destinationPath) {
     if (sourcePath[0] == '/') {
         strcpy(absSource, sourcePath);
     }
-    if (destinationPath[0] = '/') {
+    if (destinationPath[0] == '/') {
         strcpy(absDest, destinationPath);
+    }
+    struct stat st;
+    if (stat(absDest, &st) == 0) {
+        if (!S_ISREG(st.st_mode)) {
+            strcat(absDest, "/");
+            strcat(absDest, filename);
+        }
     }
     rename(absSource, absDest);
 }
