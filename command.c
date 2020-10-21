@@ -96,6 +96,7 @@ void copyFile(char *sourcePath, char *destinationPath) {
 void moveFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
     char absDest[PATH_MAX];
+    printf("apples");
 
     getcwd(absDest, sizeof(absDest));
     strcat(absDest, "/");
