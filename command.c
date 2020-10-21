@@ -80,6 +80,13 @@ void copyFile(char *sourcePath, char *destinationPath) {
     strcat(absSource, sourcePath);
     strcat(absDest, destinationPath);
 
+    if (sourcePath[0] == '/') {
+        strcpy(absSource, sourcePath);
+    }
+    if (destinationPath[0] = '/') {
+        strcpy(absDest, destinationPath);
+    }
+
     int fdSrc = open(absSource, O_RDONLY);
     int fdDest = open(absDest, O_CREAT | O_WRONLY, 0666);
     struct stat st;
@@ -91,7 +98,7 @@ void copyFile(char *sourcePath, char *destinationPath) {
 }
 
 /*
- * Like mv in bash, except arguments are always assumed to be relative paths.
+ * Like mv in bash, except worse at handling errors!
  */
 void moveFile(char *sourcePath, char *destinationPath) {
     char absSource[PATH_MAX];
@@ -102,6 +109,12 @@ void moveFile(char *sourcePath, char *destinationPath) {
     strcpy(absSource, absDest);
     strcat(absSource, sourcePath);
     strcat(absDest, destinationPath);
+    if (sourcePath[0] == '/') {
+        strcpy(absSource, sourcePath);
+    }
+    if (destinationPath[0] = '/') {
+        strcpy(absDest, destinationPath);
+    }
     rename(absSource, absDest);
 }
 
