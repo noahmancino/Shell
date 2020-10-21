@@ -3,16 +3,19 @@
 #include <string.h>
 #include "command.h"
 
+const char *NotEnoughArgs = "ERROR: not enough arguments.\n";
+const char *TooManyArgs = "ERROR: too many arguments.\n";
+const char *EndOnCol = "ERROR: Ending line on a semicolon.\n";
 /*
  * Simply makes sure the arg string isn't NULL or a semicolon.
  */
-int valid_single_arg(char *arg) {
+int valid_single_arg(const char *arg) {
     return !(arg == NULL || arg[0] == ';');
 }
 /*
  * Checks that neither arg strings are NULL or a semicolon.
  */
-int valid_double_arg(char *arg1, char* arg2) {
+int valid_double_arg(const char *arg1, const char* arg2) {
     return !(arg1 == NULL || arg1[0] == ';' || arg2 == NULL || arg2[0] == ';');
 }
 
@@ -37,105 +40,101 @@ int main(int argc, char *argv[]) {
         char *token = strtok(input, " \n");
         int final_semi = 0;
         int all_args = 0;
-        do {
-            printf("%d", all_args);
-            if (strcmp(";", token) == 0) {
-                final_semi = 1;
-                all_args = 0;
-                continue;
+        // Outer if is for empty lines.
+        if (token != NULL) {
+            do {
+                if (strcmp(";", token) == 0) {
+                    final_semi = 1;
+                    all_args = 0;
+                    continue;
+                }
+                final_semi = 0;
+                if (all_args) {
+                    printf(TooManyArgs);
+                    break;
+                }
+                if (strcmp("exit", token) == 0) {
+                    free(input);
+                    fclose(stdout);
+                    exit(EXIT_SUCCESS);
+                } else if (strcmp("ls", token) == 0) {
+                    listDir();
+                    printf("");
+                    all_args = 1;
+                } else if (strcmp("pwd", token) == 0) {
+                    showCurrentDir();
+                    printf("\n");
+                    all_args = 1;
+                } else if (strcmp("mkdir", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    if (valid_single_arg(arg)) {
+                        makeDir(arg);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else if (strcmp("cp", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    char *arg2 = strtok(NULL, " \n");
+                    if (valid_double_arg(arg, arg2)) {
+                        copyFile(arg, arg2);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else if (strcmp("cd", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    if (valid_single_arg(arg)) {
+                        changeDir(arg);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else if (strcmp("mv", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    char *arg2 = strtok(NULL, " \n");
+                    if (valid_double_arg(arg, arg2)) {
+                        moveFile(arg, arg2);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else if (strcmp("rm", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    if (valid_single_arg(arg)) {
+                        deleteFile(arg);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else if (strcmp("cat", token) == 0) {
+                    char *arg = strtok(NULL, " \n");
+                    if (valid_single_arg(arg)) {
+                        displayFile(arg);
+                        printf("");
+                        all_args = 1;
+                    } else {
+                        printf(NotEnoughArgs);
+                        break;
+                    }
+                } else {
+                    printf("Error: unrecognized command %s\n", input);
+                    break;
+                }
+            } while ((token = strtok(NULL, " \n")) != NULL);
+            if (final_semi) {
+                printf(EndOnCol);
             }
-            if (all_args) {
-                printf("ERROR HERE1");
-                break;
-            }
-            if (strcmp("exit", token) == 0) {
-                free(input);
-                fclose(stdout);
-                exit(EXIT_SUCCESS);
-            } else if (strcmp("ls", token) == 0) {
-                listDir();
-                printf("");
-                all_args = 1;
-            } else if (strcmp("pwd", token) == 0) {
-                showCurrentDir();
-                printf("\n");
-                all_args = 1;
-            } else if (strcmp("mkdir", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                if (valid_single_arg(arg)) {
-                    makeDir(arg);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else if (strcmp("cp", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                char *arg2 = strtok(NULL, " \n");
-                if (valid_double_arg(arg, arg2)) {
-                    copyFile(arg, arg2);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else if (strcmp("cd", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                if (valid_single_arg(arg)) {
-                    changeDir(arg);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else if (strcmp("mv", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                char *arg2 = strtok(NULL, " \n");
-                if (valid_double_arg(arg, arg2)) {
-                    moveFile(arg, arg2);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else if (strcmp("rm", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                if (valid_single_arg(arg)) {
-                    deleteFile(arg);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else if (strcmp("cat", token) == 0) {
-                char *arg = strtok(NULL, " \n");
-                if (valid_single_arg(arg)) {
-                    displayFile(arg);
-                    printf("");
-                    all_args = 1;
-                }
-                else {
-                    //TODO: Print
-                    break;
-                }
-            } else {
-                printf("Error: unrecognized command %s", input);
-                break;
-            }
-        }
-        while ((token = strtok(NULL, " \n")) != NULL);
-        if (final_semi) {
-            printf("ERROR HERE2");
         }
     }
 }

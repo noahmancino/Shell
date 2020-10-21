@@ -102,7 +102,7 @@ void moveFile(char *sourcePath, char *destinationPath) {
     strcpy(absSource, absDest);
     strcat(absSource, sourcePath);
     strcat(absDest, destinationPath);
-
+    printf(absDest);
     rename(absSource, absDest);
 }
 
