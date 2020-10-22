@@ -3,9 +3,10 @@
 #include <string.h>
 #include "command.h"
 
-const char *NotEnoughArgs = "ERROR: not enough arguments.\n";
-const char *TooManyArgs = "ERROR: too many arguments.\n";
-const char *EndOnCol = "ERROR: Ending line on a semicolon.\n";
+#define NOT_ENOUGH_ARGS "ERROR: not enough arguments.\n"
+#define TOO_MANY_ARGS "ERROR: too many arguments.\n"
+#define EMPTY_AFTER_COLON "ERROR: Ending line on a semicolon.\n"
+
 /*
  * Simply makes sure the arg string isn't NULL or a semicolon.
  */
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
                 }
                 final_semi = 0;
                 if (all_args) {
-                    printf(TooManyArgs);
+                    printf(TOO_MANY_ARGS);
                     break;
                 }
                 if (strcmp("exit", token) == 0) {
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_SUCCESS);
                 } else if (strcmp("ls", token) == 0) {
                     listDir();
-                    printf("");
+                    printf("\n");
                     all_args = 1;
                 } else if (strcmp("pwd", token) == 0) {
                     showCurrentDir();
@@ -75,10 +76,10 @@ int main(int argc, char *argv[]) {
                     char *arg = strtok(NULL, " \n");
                     if (valid_single_arg(arg)) {
                         makeDir(arg);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else if (strcmp("cp", token) == 0) {
@@ -86,20 +87,20 @@ int main(int argc, char *argv[]) {
                     char *arg2 = strtok(NULL, " \n");
                     if (valid_double_arg(arg, arg2)) {
                         copyFile(arg, arg2);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else if (strcmp("cd", token) == 0) {
                     char *arg = strtok(NULL, " \n");
                     if (valid_single_arg(arg)) {
                         changeDir(arg);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else if (strcmp("mv", token) == 0) {
@@ -107,30 +108,30 @@ int main(int argc, char *argv[]) {
                     char *arg2 = strtok(NULL, " \n");
                     if (valid_double_arg(arg, arg2)) {
                         moveFile(arg, arg2);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else if (strcmp("rm", token) == 0) {
                     char *arg = strtok(NULL, " \n");
                     if (valid_single_arg(arg)) {
                         deleteFile(arg);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else if (strcmp("cat", token) == 0) {
                     char *arg = strtok(NULL, " \n");
                     if (valid_single_arg(arg)) {
                         displayFile(arg);
-                        printf("");
+                        printf("\n");
                         all_args = 1;
                     } else {
-                        printf(NotEnoughArgs);
+                        printf(NOT_ENOUGH_ARGS);
                         break;
                     }
                 } else {
@@ -139,7 +140,7 @@ int main(int argc, char *argv[]) {
                 }
             } while ((token_buf = strtok(NULL, " \n")) != NULL);
             if (final_semi) {
-                printf(EndOnCol);
+                printf(EMPTY_AFTER_COLON);
             }
         }
     }
