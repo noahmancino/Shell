@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     }
     size_t size = 0;
     char *input = NULL;
-     // The way 'token' is used doesn't really make sense. It's really just there to prove I know what malloc does.
+     // The way 'token' is used doesn't really make sense. It's just their to fulfill a project requirnment that I did not know about until I was nearly finished. 
 
     char *token = (char*)malloc(sizeof(char) * 4000);
     // repl
